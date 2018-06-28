@@ -1,4 +1,10 @@
 #include <Arduino.h>
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+
+#define OLED_RESET 4
+Adafruit_SSD1306 display(OLED_RESET);
 
 #define MicPin A0
 
@@ -12,7 +18,7 @@ int multiMap(int val, int *_in, int *_out, uint8_t size)
     if (val >= _in[size - 1])
         return _out[size - 1];
 
-    uint8_t pos = 1; 
+    uint8_t pos = 1;
     while (val > _in[pos])
         pos++;
 
@@ -25,6 +31,10 @@ int multiMap(int val, int *_in, int *_out, uint8_t size)
 void setup()
 {
     Serial.begin(9600);
+    display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
+    display.setTextColor(WHITE);
+    display.clearDisplay();
+    delay(2000);
 }
 
 void loop()
@@ -54,12 +64,20 @@ void loop()
     }
     sumSound = sumSound / avgRate;
 
-    int out[] = {0, 60,  70,  80,  90, 100};
-    int in[] =  {0, 530, 570, 680, 1200, 1278};
+    int out[] = {0, 60, 70, 80, 90, 100};
+    int in[] = {0, 530, 570, 680, 1200, 1278};
     int cm = multiMap(sumSound, in, out, 6);
 
-    // Serial.print(analogRead(MicPin));
-    // Serial.print("\t");
+    display.setCursor(0, 8);
+    display.setTextSize(3);
+    display.print(" ");
+    display.print(cm);
+    display.print(" dB");
+    display.print("\n");
+    display.display();
+    delay(1000);
+    display.clearDisplay();
+
     Serial.print(sumSound);
     Serial.print("\t");
     Serial.print(cm);
